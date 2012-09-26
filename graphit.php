@@ -47,8 +47,8 @@ $results = array(); foreach ($csv as $x => $line) {
 // create pchart object
 $data = new pData();
 
-// build our X axis label
-for ($x = 0; $x <= 100; $x ++) {
+// build our labels - cutoff at 98 percent
+for ($x = 0; $x < 99; $x ++) {
     // add the label
     $labels[] = $x.'.0%';
 }
@@ -67,7 +67,7 @@ foreach ($results as $res) {
     // add points with tag for this results
     $data->addPoints($points, $res['Tag']);
     // increase line weight
-    $data->setSerieWeight($res['Tag'],1.5);
+    $data->setSerieWeight($res['Tag'], 1.5);
 }
 
 // set vertical axis
@@ -75,11 +75,12 @@ $data->setAxisName(0, "Throughput in Mbps");
 //$data->setAxisUnit(0, "mbps");
 
 // add labels
-$data->addPoints($labels, "Labels");
+$data->addPoints($labels, "labels");
 
-// set abcissa series (horizontal axis)
-$data->setSerieDescription("Labels", "Percentile");
-$data->setAbscissa("Labels");
+// set abcissa series - horizontal axis
+$data->setXAxisName("Percentile");
+$data->setSerieDescription("labels", "Percentile");
+$data->setAbscissa("labels");
 
 // create the chart
 $chart = new pImage(800,430, $data);
@@ -92,7 +93,7 @@ $chart->drawRectangle(0,0,799,429,array("R"=>0,"G"=>0,"B"=>0));
 
 // draw title
 $chart->setFontProperties(array("FontName"=>"pChart/fonts/Forgotte.ttf","FontSize"=>12));
-$chart->drawText(150,35,"WiFi Testing",array("FontSize"=>20,"Align"=>TEXT_ALIGN_BOTTOMMIDDLE));
+$chart->drawText(150,35,"Zapwireless",array("FontSize"=>20,"Align"=>TEXT_ALIGN_BOTTOMMIDDLE));
 
 // set default font
 $chart->setFontProperties(array("FontName"=>"pChart/fonts/Forgotte.ttf","FontSize"=>10));
@@ -102,9 +103,8 @@ $chart->setGraphArea(60,40,780,390);
 
 // draw scale
 $scale = array(
-    "XMargin"=>10,"YMargin"=>10,"Floating"=>false,"GridR"=>200,"GridG"=>200,"GridB"=>200,
-    "DrawSubTicks"=>true,"CycleBackground"=>true,"Mode"=>SCALE_MODE_START0,"LabelSkip"=>9,
-    "LabelRotation"=>30,
+    "XMargin"=>10,"YMargin"=>10,"GridR"=>200,"GridG"=>200,"GridB"=>200,"DrawSubTicks"=>true,
+    "CycleBackground"=>true,"Mode"=>SCALE_MODE_START0,"LabelSkip"=>4,"LabelRotation"=>30,
 );
 $chart->drawScale($scale);
 
@@ -119,13 +119,13 @@ $chart->drawLineChart();
 $chart->setFontProperties(array("FontName"=>"pChart/fonts/pf_arma_five.ttf","FontSize"=>8));
 
 // draw legend
-$chart->drawLegend(400,20,array("Style"=>LEGEND_NOBORDER,"Mode"=>LEGEND_HORIZONTAL));
+$chart->drawLegend(250,20,array("Style"=>LEGEND_NOBORDER,"Mode"=>LEGEND_HORIZONTAL));
 
 // set filename
 $outs = preg_replace('/\.csv$/i','',$argv[1]) . "-graph.png";
 
 // render graphic
-$chart->autoOutput($outs);
+$chart->render($outs);
 
 // exit clean
 echo "Success: graph generated -> $outs\n";
