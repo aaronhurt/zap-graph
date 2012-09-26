@@ -7,9 +7,8 @@ http://code.google.com/p/zapwireless/
 
 Example:
 
-$ ./graphit.php 
+$ ./graphit.php  
 Usage: ./graphit.php [csv file]
 
-$ ./graphit.php results.csv
+$ ./graphit.php results.csv  
 Success: graph generated -> results-graph.png
-
