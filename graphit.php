@@ -31,7 +31,7 @@ $results = array(); foreach ($csv as $x => $line) {
         // trim value
         $value = trim($value);
         // set blanks to litteral NULL
-        if (empty($value)) $value = "NULL";
+        if (empty($value) && $value != 0) $value = "NULL";
         // check and trim value
         if (isset($header[$y])) {
             $head = trim($header[$y]);
@@ -67,7 +67,7 @@ foreach ($results as $res) {
     // add points with tag for this results
     $data->addPoints($points, $res['Tag']);
     // increase line weight
-    $data->setSerieWeight($res['Tag'], 1.5);
+    //$data->setSerieWeight($res['Tag'], 1.5);
 }
 
 // set vertical axis
@@ -82,29 +82,30 @@ $data->setXAxisName("Percentile");
 $data->setSerieDescription("labels", "Percentile");
 $data->setAbscissa("labels");
 
-// create the chart
-$chart = new pImage(800,430, $data);
+// create the image
+$chart = new pImage(1000,670, $data);
 
 // toggle antialiasing
 $chart->Antialias = false;
 
 // add border
-$chart->drawRectangle(0,0,799,429,array("R"=>0,"G"=>0,"B"=>0));
+$chart->drawRectangle(0,0,999,669,array("R"=>0,"G"=>0,"B"=>0));
 
 // draw title
-$chart->setFontProperties(array("FontName"=>"pChart/fonts/Forgotte.ttf","FontSize"=>12));
-$chart->drawText(150,35,"Zapwireless",array("FontSize"=>20,"Align"=>TEXT_ALIGN_BOTTOMMIDDLE));
+$chart->setFontProperties(array("FontName"=>"pChart/fonts/Inconsolata.ttf","FontSize"=>20));
+$chart->drawText(20,35,"Zapwireless Test Results",array("Align"=>TEXT_ALIGN_BOTTOMLEFT));
 
 // set default font
-$chart->setFontProperties(array("FontName"=>"pChart/fonts/Forgotte.ttf","FontSize"=>10));
+$chart->setFontProperties(array("FontName"=>"pChart/fonts/Inconsolata.ttf","FontSize"=>10));
 
 // set chart area
-$chart->setGraphArea(60,40,780,390);
+$chart->setGraphArea(60,40,980,390);
 
 // draw scale
 $scale = array(
     "XMargin"=>10,"YMargin"=>10,"GridR"=>200,"GridG"=>200,"GridB"=>200,"DrawSubTicks"=>true,
-    "CycleBackground"=>true,"Mode"=>SCALE_MODE_START0,"LabelSkip"=>4,"LabelRotation"=>30,
+    "CycleBackground"=>true,"LabelSkip"=>4,"LabelRotation"=>30,"Mode"=>SCALE_MODE_MANUAL,
+    "ManualScale"=>array(0=>array("Min"=>0,"Max"=>300),1=>array("Min"=>0,"Max"=>100)),
 );
 $chart->drawScale($scale);
 
@@ -115,11 +116,50 @@ $chart->Antialias = true;
 $chart->drawLineChart();
 //$chart->drawPlotChart(array("DisplayValues"=>false,"PlotBorder"=>true,"BorderSize"=>-1,"Surrounding"=>-1,"BorderAlpha"=>80));
 
-// set default font
-$chart->setFontProperties(array("FontName"=>"pChart/fonts/pf_arma_five.ttf","FontSize"=>8));
+// draw legend box
+$chart->drawLegend(880,65,array("BoxSize"=>4,"R"=>250,"G"=>250,"B"=>250,"Surrounding"=>20,"Family"=>LEGEND_FAMILY_CIRCLE,"Mode"=>LEGEND_VERTICAL));
 
-// draw legend
-$chart->drawLegend(250,20,array("Style"=>LEGEND_NOBORDER,"Mode"=>LEGEND_HORIZONTAL));
+// toggle shadows
+$chart->setShadow(true,array("X"=>1,"Y"=>1,"R"=>0,"G"=>0,"B"=>0,"Alpha"=>10));
+
+// draw information area title
+$chart->drawText(20,440,"Result Details",array("FontSize"=>16,"Align"=>TEXT_ALIGN_BOTTOMLEFT));
+
+// some text properties
+$text = array("DrawBox"=>true,"BoxRounded"=>true,"R"=>0,"G"=>0,"B"=>0,"Angle"=>0,"Align"=>TEXT_ALIGN_TOPLEFT);
+
+// place holder
+$tags = array();
+
+// draw test information
+$x = 20; foreach ($results as $res) {
+    // populate tags
+    $tags[] = $res['Tag'];
+    // draw textbox for this tag
+    $chart->drawText($x,455,
+        "Tag: " . $res['Tag'] .
+        "\nProtocol: " . $res['Protocol'] .
+        "\nMulticast: " . $res['Multicast'] .
+        "\nToS: " . $res['ToS'] .
+        "\nSamples: " . $res['Samples'] .
+        "\nSample Size: " . $res['Sample Size'] .
+        "\nPayload Length: " . $res['Payload Length'] .
+        "\nTransmit Delay: " . $res['Payload Transmit Delay'] .
+        "\nReceived: " . $res['Payloads Received'] .
+        "\nDropped: " . $res['Payloads Dropped'] .
+        "\nRepeated: " . $res['Payloads Repeated'] .
+        "\nOut of order: " . $res['Payloads Outoforder'],
+        $text
+    );
+    // move x for next box
+    $x += 160;
+}
+
+// write chart labels ...
+$data->setAxisUnit(0, " Mbps");
+$chart->writeLabel($tags,25,array("SerieBoxSize"=>4,"VerticalMargin"=>4,"HorizontalMargin"=>4));
+$chart->writeLabel($tags,55,array("SerieBoxSize"=>4,"VerticalMargin"=>4,"HorizontalMargin"=>4));
+$chart->writeLabel($tags,90,array("SerieBoxSize"=>4,"VerticalMargin"=>4,"HorizontalMargin"=>4));
 
 // set filename
 $outs = preg_replace('/\.csv$/i','',$argv[1]) . "-graph.png";
@@ -130,4 +170,3 @@ $chart->render($outs);
 // exit clean
 echo "Success: graph generated -> $outs\n";
 exit(0);
- 
